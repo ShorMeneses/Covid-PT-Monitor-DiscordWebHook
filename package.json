@@ -1,0 +1,14 @@
+{
+  "name": "discordwebhook",
+  "version": "1.0.0",
+  "description": "Covid PT monitor webhook-discord",
+  "main": "start.js",
+  "scripts": {},
+  "author": "Luís Meneses",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^0.20.0",
+    "crawler-request": "^1.2.2",
+    "webhook-discord": "^3.7.7"
+  }
+}
