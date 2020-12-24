@@ -5,12 +5,14 @@ const min = require("./Sites/MinSaude.js");
 const minSaudeSite = require("./Sites/MinSaude.js");
 const dgsSite = require("./Sites/Dgs.js");
 const infoculSite = require("./Sites/Infocul.js");
-const config = require("./config.json");
+const configDiscord = require("./configDiscord.json");
+const configTelegram = require("./configTelegram.json");
 
 const webhooks = [];
 var lastNumber;
 var found = false;
 var varerror=0;
+
 
 addHooks();
 startMessage();
@@ -101,12 +103,11 @@ async function success(link) {
   var res=await pdfreader.read(link);
   var msg;
   if(res != undefined){
-    console.log(res);
      msg = new webhook.MessageBuilder()
         .setName("DGS Covid Boletim Diário")
         .setColor("#aabbcc")
         .setAvatar("https://www.farrer.co.uk/globalassets/coronavirus-low-res.jpg")
-        .setText("Found a new report!\n" + res)
+        .setText("Found a new report!\n" + "Confirmados "+res[1]+"\n"+ "Em Vigilância "+res[0]+"\n"+ "Recuperados "+res[2]+"\n"+ "Ativos "+res[3]+"\n"+ "Óbitos "+res[4]+"\n")
         .setDescription(link);
   }else{
     console.log(res);
@@ -120,6 +121,22 @@ async function success(link) {
     for (var i = 0; i < webhooks.length; i++) {
       webhooks[i].send(msg);
     }
+
+    var strToTelegram = "Found a new report!\n" + "Confirmados "+res[1]+"\n"+ "Em Vigilância "+res[0]+"\n"+ "Recuperados "+res[2]+"\n"+ "Ativos "+res[3]+"\n"+ "Óbitos "+res[4]+"\n"+"\n"+link;
+
+
+    for (var i=0;i<configTelegram.length;i++){
+      console.log(configTelegram[i].botIdAndToken);
+      try{
+        await messageToTelegramChannel(configTelegram[i].botIdAndToken,configTelegram[i].chatId,strToTelegram);
+      } catch (e){
+        console.log("Error sending to telegram  Id:"+configTelegram[i].chatId);
+      }
+    }
+
+
+
+
 
   }
 
@@ -137,11 +154,20 @@ function startMessage() {
       webhooks[0].send(msg);
 
   setReportNumberAndStart();
+
+
 }
 
+
+async function messageToTelegramChannel(botIdandToken,chId,str){
+  await axios.get("https://api.telegram.org/bot"+botIdandToken+"/sendMessage?chat_id="+chId+"&text="+encodeURIComponent(str));
+
+}
+
+
 function addHooks() {
-  for (var i=0;i<config.length;i++){
-    var hook = new webhook.Webhook(config[i].webhook);
+  for (var i=0;i<configDiscord.length;i++){
+    var hook = new webhook.Webhook(configDiscord[i].webhook);
     webhooks.push(hook);
   }
 
